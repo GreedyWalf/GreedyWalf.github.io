@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Redis进阶 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="开始之前的准备： 准备三台虚拟机，分别为： master: 192.168.9.3 slaver: 192.168.9.4，192.168.9.5 备注： windows使用VMWare安装虚拟机，使用NAT模式配置虚拟机静态IP，参考： mac使用VmFlusion安装虚拟机，使用NAT模式配置虚拟机静态IP，参考： 一、redis主从配置  主从复制就是我们常见的master&#x2F;slave模式，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis进阶">
+<meta property="og:url" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="开始之前的准备： 准备三台虚拟机，分别为： master: 192.168.9.3 slaver: 192.168.9.4，192.168.9.5 备注： windows使用VMWare安装虚拟机，使用NAT模式配置虚拟机静态IP，参考： mac使用VmFlusion安装虚拟机，使用NAT模式配置虚拟机静态IP，参考： 一、redis主从配置  主从复制就是我们常见的master&#x2F;slave模式，">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208142730497.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208135432619.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208135656244.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208140148494.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208140253106.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/images/image-20191210150226539.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208142019430.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208142340972.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208145842208.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208151339015.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208151953784.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208154238610.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208154414730.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/images/image-20191209140854502.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/images/image-20191209144341019.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/images/image-20191209151134105.png">
+<meta property="og:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/images/image-20191209152520032.png">
+<meta property="article:published_time" content="2019-12-08T14:12:57.359Z">
+<meta property="article:modified_time" content="2019-12-19T01:10:49.990Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/.%5Cimages%5Cimage-20191208142730497.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Redis进阶" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/12/08/Redis%E8%BF%9B%E9%98%B6/" class="article-date">
+  <time datetime="2019-12-08T14:12:57.359Z" itemprop="datePublished">2019-12-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Redis进阶
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>开始之前的准备：</p>
+<p>准备三台虚拟机，分别为：</p>
+<p>master: 192.168.9.3</p>
+<p>slaver: 192.168.9.4，192.168.9.5</p>
+<p>备注：</p>
+<p>windows使用VMWare安装虚拟机，使用NAT模式配置虚拟机静态IP，参考：</p>
+<p>mac使用VmFlusion安装虚拟机，使用NAT模式配置虚拟机静态IP，参考：</p>
+<h2 id="一、redis主从配置"><a href="#一、redis主从配置" class="headerlink" title="一、redis主从配置"></a>一、redis主从配置</h2><p><img src=".%5Cimages%5Cimage-20191208142730497.png" alt="image-20191208142730497"> </p>
+<p>主从复制就是我们常见的master/slave模式， master可以进行读写操作，当写操作导致数据发生变化时会自动将数据同步给slave。</p>
+<p>一般情况下slave是只读的，并接受master同步过来的数据，一个master可以有多个slave。</p>
+<h3 id="1-1-修改redis-conf配置"><a href="#1-1-修改redis-conf配置" class="headerlink" title="1.1 修改redis.conf配置"></a>1.1 修改redis.conf配置</h3><p>修改master节点配置:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 设置后台启动redis服务</span><br><span class="line">daemonize yes</span><br><span class="line"></span><br><span class="line"># 默认为yes，这里修改为no，允许其他redis连接到该master节点</span><br><span class="line">protected-mode no</span><br><span class="line"></span><br><span class="line"># 将bind为本机ip配置注释掉，允许其他redis服务连接当前master节点</span><br><span class="line"># bind 127.0.0.1</span><br></pre></td></tr></table></figure>
+
+
+
+<p>修改两个slave节点配置：</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 设置后台启动redis服务</span><br><span class="line">daemonize yes</span><br><span class="line"></span><br><span class="line"># 在slave节点中配置master节点ip和端口号</span><br><span class="line">slaveof <span class="number">192.168</span>.<span class="number">9.3</span> <span class="number">6379</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>分别启动master节点、slave节点：</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server ../redis.conf</span><br></pre></td></tr></table></figure>
+
+
+
+<p>查看redis主从配置是否成功：</p>
+<p>相关命令：</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis-cli</span><br><span class="line">&gt; info replication</span><br></pre></td></tr></table></figure>
+
+
+
+<p>master节点查看：</p>
+<p> l<img src=".%5Cimages%5Cimage-20191208135432619.png" alt="image-20191208135656244"></p>
+<p>slave节点查看：</p>
+<p>l<img src=".%5Cimages%5Cimage-20191208135656244.png" alt="image-20191208135656244"></p>
+<p>测试：</p>
+<p>master节点设置数据：</p>
+<p><img src=".%5Cimages%5Cimage-20191208140148494.png" alt="image-20191208140148494"> </p>
+<p>在slave节点中获取数据：</p>
+<p><img src=".%5Cimages%5Cimage-20191208140253106.png" alt="image-20191208140253106"> </p>
+<p>由上面测试可以看出来，redis的主从同步已经配置成功。</p>
+<h3 id="1-2-redis主从实现原理"><a href="#1-2-redis主从实现原理" class="headerlink" title="1.2 redis主从实现原理"></a>1.2 redis主从实现原理</h3><h4 id="1-2-1-redis数据同步的三种方式"><a href="#1-2-1-redis数据同步的三种方式" class="headerlink" title="1.2.1 redis数据同步的三种方式"></a>1.2.1 redis数据同步的三种方式</h4><ul>
+<li><p>全量复制</p>
+<blockquote>
+<p>redis全量复制发生在slave初始化阶段，这时slave需要将master上所有的数据复制一份。</p>
+</blockquote>
+</li>
+<li><p>增量复制</p>
+<blockquote>
+<p>redis2.8开始支持主从复制断点续传，如果主从复制过程中，网络连接断了，那么在网络恢复时候，可以接着上次复制地方继续复制，而不是重头开始复制一份；</p>
+<p>实现原理：master节点会在内存中创建一个==backlog==，master和slave都会保存一个replica offset 和 master id，offset保存在basklog中，如果master和slave网络连接断了，slave会让master从上次的replica offset开始继续复制，如果没有找到对应的offset，那么就会执行一次全量同步。</p>
+</blockquote>
+</li>
+<li><p>无磁盘复制</p>
+<blockquote>
+<p>无磁盘复制是针对于redis复制的弊端而设计的。redis复制原理是基于RDB持久化方式实现的，也就是master在后台保存RDB快照，slave接受到RDB文件并载入，这种方式会存在一些问题：</p>
+<p>1) 数据配置可以不使用RDB持久化方式（如AOF），当master禁用了RDB时，如果执行了复制初始化操作，redis依旧会生成RDB快照，当master下次启动时会执行该RDB文件恢复数据，但是因为复制的时间点不确定，所以恢复的数据可能是任何时间点的，这就会造成出现问题。</p>
+<p>2）当硬盘的性能比较慢的情况下（网盘），那么初始化复制过程会对性能产生影响。所以，redis2.8以后的版本，redis可以不使用RDB文件方式来实现数据同步，直接发送数据，可以通过下面配置来开启该功能（master在内存中直接创建rdb，然后发送给slave，不用落在本地磁盘中了）：</p>
+<p>repl-diskless-sync yes</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="1-2-2-redis主从复制流程和原理"><a href="#1-2-2-redis主从复制流程和原理" class="headerlink" title="1.2.2 redis主从复制流程和原理"></a>1.2.2 redis主从复制流程和原理</h4><p><img src="images/image-20191210150226539.png" alt="image-20191210150226539">  </p>
+<p>​    master/slave复制策略是采用乐观复制，也就是说可以容忍在一定时间内master/slave数据的内容是不同的，但是两者的数据会最终同步。具体来说，redis的主从同步过程本身是异步的，意味着master执行完客户端请求的命令 后会立即返回结果给客户端，然后异步的方式把命令同步给slave。这一特征保证启用master/slave后 master的性能不会受到影响。</p>
+<p> 但是另一方面，如果在这个数据不一致的窗口期间，master/slave因为网络问题断开连接，而这个时候，master 是无法得知某个命令最终同步给了多少个slave数据库。不过redis提供了一个配置项来限制只有数据至少同步给多 少个slave的时候，master才是可写的： </p>
+<p><code>min-slaves-to-write 3</code> 表示只有当3个或以上的slave连接到master，master才是可写的;</p>
+<p><code>min-slaves-max-lag 10</code> 表示允许slave最长失去连接的时间，如果10秒还没收到slave的响应，则master认为该 slave已断开;</p>
+<p><strong>测试：slave监听master，实现增量数据同步</strong></p>
+<p>1) 首先在slave节点监听master节点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">redis-cli</span><br><span class="line">&gt; replconf listening-port 6379</span><br><span class="line">&gt; sync</span><br></pre></td></tr></table></figure>
+
+
+
+<p>2) master节点设置数据</p>
+<p> <img src=".%5Cimages%5Cimage-20191208142019430.png" alt="master设置数据"></p>
+<p>3) slave会同步master节点数据更新命令</p>
+<p><img src=".%5Cimages%5Cimage-20191208142340972.png" alt="image-20191208142340972"> </p>
+<h2 id="二、redis哨兵机制"><a href="#二、redis哨兵机制" class="headerlink" title="二、redis哨兵机制"></a>二、redis哨兵机制</h2><h3 id="2-1-哨兵机制-sentinel"><a href="#2-1-哨兵机制-sentinel" class="headerlink" title="2.1 哨兵机制(sentinel)"></a>2.1 哨兵机制(sentinel)</h3><p>master/slave模式是典型的一主多从系统，salve在整个体系中起到了数据冗余备份和读写分离的作用。当master遇到异常中断后，需要从slave中选举一个新的master继续对外提供服务。这种机制广泛应用于分布式相关中间件，如zookeeper中提供leader选举、kafka中通过zk的节点实现master选举。所以，redis中也需要一种机制来实现master的决策，而redis并没有提供自动master选举功能，需要借助哨兵来进行监控（==redis通过哨兵模式实现master选举，构建redis集群的高可用==）。</p>
+<h3 id="2-2-什么是哨兵"><a href="#2-2-什么是哨兵" class="headerlink" title="2.2 什么是哨兵"></a>2.2 什么是哨兵</h3><h4 id="2-2-1-哨兵作用"><a href="#2-2-1-哨兵作用" class="headerlink" title="2.2.1 哨兵作用"></a>2.2.1 哨兵作用</h4><p>1) 监控master和slave是否正常运行；</p>
+<p>2）master出现故障时，自动将slave升级为master；</p>
+<p>哨兵作为redis一个独立的服务（进程），使用哨兵后架构图：</p>
+<p><img src=".%5Cimages%5Cimage-20191208145842208.png" alt="image-20191208145842208"> </p>
+<p>在上图的架构中，很容易发现问题：哨兵的单点问题，如何保证哨兵服务的高可用？</p>
+<p>可以使用多个哨兵监控任务，维持系统的稳定性，此时哨兵不仅会监控master和slave，同时还会互相监控，这种方式称为哨兵集群。哨兵集群需要==解决故障发现、和master决策的协商机制==问题。</p>
+<p><img src=".%5Cimages%5Cimage-20191208151339015.png" alt="image-20191208151339015"> </p>
+<p>看上图多个哨兵组成的架构，多个哨兵之间如何关联的？</p>
+<p>sentinel会因为监控同一个master从而产生关联，从而实现多个sentinel之间的相互感知。</p>
+<p>原理如下（基于pub/sub实现）：</p>
+<p>1) 需要相互感知的sentinel都向他们共同监视的master节点订阅<code>channel:sentinel:hello</code>；</p>
+<p>2)  新加入的sentinel节点向这个channel发布一条消息，包含自己本身的信息，这样订阅了这个channel的sentinel 就可以发现这个新的sentinel；</p>
+<p>3)  新加入得sentinel和其他sentinel节点建立长连接；</p>
+<p><img src=".%5Cimages%5Cimage-20191208151953784.png" alt="image-20191208151953784"> </p>
+<h4 id="2-2-2-master故障发现和sentinel决策"><a href="#2-2-2-master故障发现和sentinel决策" class="headerlink" title="2.2.2 master故障发现和sentinel决策"></a>2.2.2 master故障发现和sentinel决策</h4><p>sentinel节点会定期向master节点发送心跳包来判断存活状态，一旦master节点没有正确响应，sentinel会把master设置为“主观不可用状态”，然后它会把“主观不可用”发送给其他所有的sentinel节点去确认，当确认的sentinel节点数大于&gt;quorum时，则会认为master是“客观不可用”，接着就开始进入选举新的master流程；</p>
+<p>但是这里又会遇到一个问题，就是在sentinel集群中，如果多个节点同时发现master节点达到客观不可用状 态，那谁来决策选择哪个节点作为maste呢？</p>
+<p>这个时候就需要从sentinel集群中选择一个leader来做决策（leader选举）。而这里 用到了==一致性算法Raft算法==，它和Paxos算法类似，都是分布式一致性算法。但是它比Paxos算法要更容易理解； Raft和Paxos算法一样，也是==基于投票算法，只要保证过半数节点通过提议即可==;</p>
+<p>动画演示地址：<a href="http://thesecretlivesofdata.com/raft/" target="_blank" rel="noopener">http://thesecretlivesofdata.com/raft/</a></p>
+<h3 id="2-3-redis哨兵模式配置"><a href="#2-3-redis哨兵模式配置" class="headerlink" title="2.3 redis哨兵模式配置"></a>2.3 redis哨兵模式配置</h3><p>1) 我们在192.168.9.3虚拟机上配置一个哨兵服务，修改sentinel.conf：</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">port <span class="number">26379</span></span><br><span class="line"># 设置要监控的master的名字、ip、端口，以及需要slave通过最低的票数</span><br><span class="line">sentinel monitor mymaster <span class="number">192.168</span>.<span class="number">9.5</span> <span class="number">6379</span> <span class="number">1</span></span><br><span class="line"># 表示如果<span class="number">5</span>s内mymaster没响应，就认为SDOWN</span><br><span class="line">sentinel down-after-milliseconds mymaster <span class="number">5000</span></span><br><span class="line"># 表示如果<span class="number">15</span>秒后，mysater仍没活过来，则启动failover，从剩下的slave中选一个升级为master</span><br><span class="line">sentinel failover-timeout mymaster <span class="number">15000</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>2) 需要修改192.168.9.4、192.168.9.5的redis.conf，确保这两个slave可以被sentinel服务连接通，并且可以被选举作为master节点。</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 默认为yes，这里修改为no，允许其他redis连接到该master节点</span><br><span class="line"><span class="keyword">protected</span>-mode no</span><br><span class="line"></span><br><span class="line"># 将bind为本机ip配置注释掉，允许其他redis服务连接当前master节点</span><br><span class="line"># bind <span class="number">127.0</span>.<span class="number">0.1</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>3) 启动sentinel服务，之后断开原来master节点的redis服务（192.168.9.3），观察sentinel监控及master选举结果：</p>
+<p>两种启动哨兵服务方式：</p>
+<ul>
+<li>redis-server ../sentinel.conf –sentinel</li>
+<li>redis-sentinel ../sentinel.conf</li>
+</ul>
+<p><img src=".%5Cimages%5Cimage-20191208154238610.png" alt="image-20191208154238610"> </p>
+<p><img src=".%5Cimages%5Cimage-20191208154414730.png" alt="image-20191208154414730"> </p>
+<p>解析：</p>
+<p>哨兵监控一个系统时，只需要配置监控master即可，哨兵会自动发现所有slave；</p>
+<p>当我们把master关闭，等待指定时间后（默认是30秒），会自动进行切换，观看切换日志：</p>
+<ul>
+<li>+sdown表示哨兵”主观认为master已经停止服务”了，+odown表示哨兵”客观认为master停止服务”了，接着哨兵开始进行故障恢复，挑选一个slave升级为master；</li>
+<li>+try-failover表示哨兵开始进行故障恢复；</li>
+<li>+failover-end 表示哨兵完成故障恢复；</li>
+<li>+slave表示列出新的master和slave服务器，我们仍然可以看到已经停掉的master，哨兵并没有清除已停止的服务的实例，这是因为已经停止的服务器有可能会在某个时间进行恢复，恢复以后会以slave角色加入到整个集群中；</li>
+</ul>
+<h2 id="三、redis-cluster"><a href="#三、redis-cluster" class="headerlink" title="三、redis-cluster"></a>三、redis-cluster</h2><p>3.3 redis-cluster配置</p>
+<p>redis集群配置，最少使用3台机器，加上3台slave，也就是6台，下面在单机下使用配置不同端口的方式配置redis集群（伪集群），结构图如下：</p>
+<p><img src="images/image-20191209140854502.png" alt="image-20191209140854502"> </p>
+<p>1) 将redis安装到指定目录下，创建多个端口对应文件件，修改每个端口的redis.conf配置。</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 将解压后的redis安装到执行目录下</span><br><span class="line">cd /root/redis-<span class="number">3.2</span>.<span class="number">0</span>/src</span><br><span class="line">make install PREFIX=/usr/qinyupeng/redis-cluster</span><br><span class="line"></span><br><span class="line"># 修改bin目录为redis目录</span><br><span class="line">mv bin redis</span><br><span class="line"></span><br><span class="line"># 创建端口号对应的多个文件夹，复制redis.conf文件到每个文件夹中</span><br><span class="line">mkdir -p <span class="number">7000</span> <span class="number">7001</span> <span class="number">7002</span> <span class="number">7003</span> <span class="number">7004</span> <span class="number">7005</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>修改redis.conf，内容如下（port修改为对应端口）：</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># 指定服务端口</span><br><span class="line">port <span class="number">7000</span></span><br><span class="line"></span><br><span class="line"># 默认为no，修改为yes，让redis服务后台运行</span><br><span class="line">daemonize yes</span><br><span class="line"></span><br><span class="line"># 如果配置的是多个机器，这里需要配置机器对应的ip，最简单的方式，直接注释掉</span><br><span class="line"># bind <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"></span><br><span class="line"># 默认为yes，修改为no，表示允许其他客户端连接</span><br><span class="line"><span class="keyword">protected</span>-mode no</span><br><span class="line"></span><br><span class="line"># 开启cluster，去掉注释</span><br><span class="line">cluster-enabled yes </span><br><span class="line"></span><br><span class="line"># 自动生成（会在每个端口文件夹中自动生成该文件）</span><br><span class="line">cluster-config-<span class="keyword">file</span> nodes.conf</span><br><span class="line"></span><br><span class="line"># 配置节点间通讯时间<span class="number">15</span>s</span><br><span class="line">cluster-node-timeout <span class="number">15000</span></span><br><span class="line"></span><br><span class="line"># 开启AOF持久化策略</span><br><span class="line">appendonly yes</span><br></pre></td></tr></table></figure>
+
+
+
+<p>2) 安装redis-trib所需的ruby脚本</p>
+<p>从redis安装目录src中复制出<code>redis-trib.rb</code>文件到<code>/usr/qinyupeng/redis-cluster</code>中，该文件为二进制文件，使用ruby语言写的，需要安装ruby。</p>
+<p>注意：centos默认yum install ruby方式安装的ruby版本过低(2.0)，需要安装的ruby版本最低为2.2.2，解决方式参考：<a href="https://blog.csdn.net/sd4493091/article/details/85761148" target="_blank" rel="noopener">https://blog.csdn.net/sd4493091/article/details/85761148</a></p>
+<p>centos7安装的ruby版本过低，在后续执行<code>gem install redis</code>会出现版本过低错误，这里使用上述链接第一种方式，修改默认的yum源解决yum安装ruby版本过低问题。</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yum install centos-release-scl-rh</span><br><span class="line">yum install rh-ruby23</span><br><span class="line"># 必须执行异步</span><br><span class="line">scl enable  rh-ruby23 bash</span><br><span class="line"></span><br><span class="line"># 查看ruby版本</span><br><span class="line">ruby -v</span><br></pre></td></tr></table></figure>
+
+
+
+<p>ruby安装成功后，执行命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install redis</span><br></pre></td></tr></table></figure>
+
+<p>注意：如果提示/usr/bin/gem命令不存在，则执行下面命令(ruby默认安装到了/usr/local/bin目录里了)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;bin&#x2F;gem &#x2F;usr&#x2F;bin&#x2F;gem</span><br></pre></td></tr></table></figure>
+
+
+
+<p>3) 使用redis-trib工具自动化配置redis-cluster</p>
+<p>在安装好指定版本的ruby之后，<code>redis-trib.rb</code>这个二进制文件就可以使用了，在使用之前需要先启动配置的6个端口的redis服务，可以使用shell脚本批量启动，在<code>/usr/qinyupeng/redis-cluster</code>目录下新建文件<code>start-all.sh</code>，脚本内容如下：</p>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">cd <span class="number">7000</span></span><br><span class="line">redis-server redis.conf</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7001</span></span><br><span class="line">redis-server redis.conf</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7002</span></span><br><span class="line">redis-server redis.conf</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7003</span></span><br><span class="line">redis-server redis.conf</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7004</span></span><br><span class="line">redis-server redis.conf</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7005</span></span><br><span class="line">redis-server redis.conf</span><br><span class="line">cd ..</span><br></pre></td></tr></table></figure>
+
+<p>注意：确保脚本中的命令可以正确执行，具体可自行调整。</p>
+<p>给shell脚本赋可执行权限：<code>chmod 777 start-all.sh</code></p>
+<p>执行shell脚本，启动所有的redis服务：<code>./start-all.sh</code></p>
+<p>查看redis是否启动成功：<code>ps -ef | grep redis</code>，启动成功后，结果如下：</p>
+<p><img src="images/image-20191209144341019.png" alt="image-20191209144341019"> </p>
+<p>使用redis-trib.rb创建redis集群，命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#  参数：--replicas 1 参数表示为每个主节点创建一个从节点</span><br><span class="line">.&#x2F;redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005</span><br><span class="line">.&#x2F;redis-trib.rb create --replicas 1 49.235.93.80:7000 49.235.93.80:7001 49.235.93.80:7002 49.235.93.80:7003 49.235.93.80:7004 49.235.93.80:7005</span><br></pre></td></tr></table></figure>
+
+<p>若集群配置成功，则结果如下：</p>
+<p><img src="images/image-20191209151134105.png" alt="image-20191209151134105"> </p>
+<p>可以看到master和slave节点分配情况和slots分配情况。至此，简单的redis-cluster集群搭建完成！</p>
+<p>备注：</p>
+<ul>
+<li>批量kill多个redis服务的shell脚本（shutdown-all.sh）</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -e|grep redis|awk &#39;&#123;print $1&#125;&#39;|xargs kill -9</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>批量删除每个端口文件夹中的 appendonly.aof、dump.rdb、nodes.conf文件脚本（clear-all.sh）</li>
+</ul>
+<figure class="highlight pascal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">cd <span class="number">7000</span></span><br><span class="line">rm -rf a* n* d*</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7001</span></span><br><span class="line">rm -rf a* n* d*</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7002</span></span><br><span class="line">rm -rf a* n* d*</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7003</span></span><br><span class="line">rm -rf a* n* d*</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7004</span></span><br><span class="line">rm -rf a* n* d*</span><br><span class="line">cd ..</span><br><span class="line">cd <span class="number">7005</span></span><br><span class="line">rm -rf a* n* d*</span><br><span class="line">cd ..</span><br></pre></td></tr></table></figure>
+
+
+
+<p>4）redis-cluster客户端连接及操作命令</p>
+<p><code>redis-cli -c -h 127.0.0.1 -p 7000</code> 连接集群中任何一个节点</p>
+<p><code>cluster info</code> 查看集群状态信息</p>
+<p><code>cluster nodes</code> 查看集群节点信息</p>
+<p><img src="images/image-20191209152520032.png" alt="image-20191209152520032">    </p>
+<h2 id="四、redis实战"><a href="#四、redis实战" class="headerlink" title="四、redis实战"></a>四、redis实战</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/12/08/Redis%E8%BF%9B%E9%98%B6/" data-id="ck564u1ty0002m0jr54qw0qyz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/01/09/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Hello World
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">January 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/01/09/newpapername/">newpapername</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/09/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2019/12/08/Redis%E8%BF%9B%E9%98%B6/">Redis进阶</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
